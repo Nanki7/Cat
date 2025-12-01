@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Calm - Pixel Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #2c1810;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #8b6f47;
+            border: 4px solid #5a4a3a;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-title {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* Living Room Scene */
+        .living-room {
+            background: #d4a574;
+            border: 3px solid #8b6f47;
+            border-radius: 4px;
+            padding: 30px;
+            margin-bottom: 20px;
+            position: relative;
+            min-height: 300px;
+        }
+
+        /* Floor pattern */
+        .living-room::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: repeating-linear-gradient(
+                90deg,
+                #b8956a 0px,
+                #b8956a 20px,
+                #c9a67a 20px,
+                #c9a67a 40px
+            );
+        }
+
+        /* Cats Container */
+        .cats-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            margin-top: 40px;
+        }
+
+        /* Cat Sprite */
+        .cat {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cat-sprite {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #000;
+            position: relative;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        /* Milky - Black and White Cow Cat */
+        .cat-milky .cat-sprite {
+            background: #fff;
+            border-color: #000;
+        }
+
+        .cat-milky .cat-sprite::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            top: 0;
+            background: #000;
+            clip-path: polygon(0 0, 100% 0, 100% 60%, 0 60%);
+        }
+
+        .cat-milky .cat-sprite::after {
+            content: '😾';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+        }
+
+        /* Mimi - Orange Tabby */
+        .cat-mimi .cat-sprite {
+            background: #ff8c42;
+            border-color: #d2691e;
+        }
+
+        .cat-mimi .cat-sprite::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent 0px,
+                transparent 5px,
+                #d2691e 5px,
+                #d2691e 10px
+            );
+            opacity: 0.3;
+        }
+
+        .cat-mimi .cat-sprite::after {
+            content: '😿';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+        }
+
+        /* Mood Bar */
+        .mood-bar-container {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            background: #333;
+            border: 2px solid #000;
+            padding: 2px;
+        }
+
+        .mood-bar {
+            height: 12px;
+            background: linear-gradient(90deg, #ff0000 0%, #ffff00 50%, #00ff00 100%);
+            transition: width 0.3s ease;
+            border: 1px solid #000;
+        }
+
+        .mood-value {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+            white-space: nowrap;
+        }
+
+        .cat-name {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+            font-size: 14px;
+        }
+
+        /* Dialogue Bubbles */
+        .dialogue-container {
+            margin: 20px 0;
+            min-height: 100px;
+        }
+
+        .dialogue-bubble {
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            position: relative;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .dialogue-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #000;
+        }
+
+        .dialogue-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -7px;
+            left: 22px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #fff;
+        }
+
+        .dialogue-speaker {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .dialogue-text {
+            color: #000;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Choice Buttons */
+        .choices-container {
+            margin-top: 20px;
+        }
+
+        .choice-button {
+            width: 100%;
+            padding: 15px;
+            margin: 8px 0;
+            background: #4a7c59;
+            border: 3px solid #000;
+            border-radius: 4px;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .choice-button:hover {
+            background: #5a9c6a;
+            transform: translateY(-2px);
+            box-shadow: 3px 3px 0 #000;
+        }
+
+        .choice-button:active {
+            transform: translateY(0);
+            box-shadow: 1px 1px 0 #000;
+        }
+
+        .choice-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Round Indicator */
+        .round-indicator {
+            text-align: center;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        /* Ending Screen */
+        .ending-screen {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .ending-screen.active {
+            display: block;
+        }
+
+        .ending-title {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .ending-result {
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #000;
+        }
+
+        .final-moods {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .final-mood-item {
+            text-align: center;
+        }
+
+        .restart-button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: #4a7c59;
+            border: 3px solid #000;
+            border-radius: 4px;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .restart-button:hover {
+            background: #5a9c6a;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🐱 Cat Calm 🐱</h1>
+        
+        <!-- Main Game Screen -->
+        <div id="gameScreen" class="game-screen">
+            <div class="round-indicator" id="roundIndicator">Round 1 of 5</div>
+            
+            <div class="living-room">
+                <div class="cats-container">
+                    <!-- Milky Cat -->
+                    <div class="cat cat-milky">
+                        <div class="mood-bar-container">
+                            <div class="mood-value" id="milkyMoodValue">60</div>
+                            <div class="mood-bar" id="milkyMoodBar" style="width: 60%"></div>
+                        </div>
+                        <div class="cat-sprite"></div>
+                        <div class="cat-name">Milky</div>
+                    </div>
+                    
+                    <!-- Mimi Cat -->
+                    <div class="cat cat-mimi">
+                        <div class="mood-bar-container">
+                            <div class="mood-value" id="mimiMoodValue">65</div>
+                            <div class="mood-bar" id="mimiMoodBar" style="width: 65%"></div>
+                        </div>
+                        <div class="cat-sprite"></div>
+                        <div class="cat-name">Mimi</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dialogue Container -->
+            <div class="dialogue-container" id="dialogueContainer">
+                <!-- Dialogue will be inserted here -->
+            </div>
+            
+            <!-- Choices Container -->
+            <div class="choices-container" id="choicesContainer">
+                <!-- Choices will be inserted here -->
+            </div>
+        </div>
+        
+        <!-- Ending Screen -->
+        <div id="endingScreen" class="ending-screen">
+            <h2 class="ending-title" id="endingTitle">Game Over</h2>
+            <div class="ending-result">
+                <div id="endingDescription"></div>
+                <div class="final-moods">
+                    <div class="final-mood-item">
+                        <div><strong>Milky's Final Mood:</strong></div>
+                        <div id="finalMilkyMood">60</div>
+                    </div>
+                    <div class="final-mood-item">
+                        <div><strong>Mimi's Final Mood:</strong></div>
+                        <div id="finalMimiMood">65</div>
+                    </div>
+                </div>
+            </div>
+            <button class="restart-button" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            round: 1,
+            milkyMood: 60,
+            mimiMood: 65,
+            totalRounds: 5
+        };
+
+        // Game Script Data
+        // Each round contains dialogue and choices with mood effects
+        const gameScript = [
+            {
+                round: 1,
+                dialogues: [
+                    { speaker: 'Milky', text: "Stop following me everywhere, Mimi. You're exhausting." },
+                    { speaker: 'Mimi', text: "I just wanted to sit with you… why are you always like this?" }
+                ],
+                choices: [
+                    { text: "Milky, maybe she just wants company.", effects: { milky: 10, mimi: 10 } },
+                    { text: "Mimi, give him space if he needs it.", effects: { milky: 5, mimi: -5 } },
+                    { text: "Stop fighting, both of you.", effects: { milky: -5, mimi: -5 } }
+                ]
+            },
+            {
+                round: 2,
+                dialogues: [
+                    { speaker: 'Milky', text: "You cry all the time. It's annoying." },
+                    { speaker: 'Mimi', text: "Well maybe if you cared, I wouldn't be sad!" }
+                ],
+                choices: [
+                    { text: "Mimi, I know you're scared. It's okay to need comfort.", effects: { milky: 0, mimi: 10 } },
+                    { text: "Milky, you sound harsh. Maybe say it gently?", effects: { milky: 8, mimi: 0 } },
+                    { text: "I'm tired of this behavior from you two.", effects: { milky: -10, mimi: -10 } }
+                ]
+            },
+            {
+                round: 3,
+                dialogues: [
+                    { speaker: 'Milky', text: "I just want quiet." },
+                    { speaker: 'Mimi', text: "I just want love." }
+                ],
+                choices: [
+                    { text: "You both want different things — let's compromise.", effects: { milky: 8, mimi: 8 } },
+                    { text: "Milky, try sitting with Mimi for a while.", effects: { milky: 5, mimi: 10 } },
+                    { text: "Mimi, love doesn't come from chasing.", effects: { milky: 2, mimi: 5 } }
+                ]
+            },
+            {
+                round: 4,
+                dialogues: [
+                    { speaker: 'Milky', text: "Fine… maybe I went too far." },
+                    { speaker: 'Mimi', text: "I… also acted too needy." }
+                ],
+                choices: [
+                    { text: "You apologized. I'm proud of both of you.", effects: { milky: 12, mimi: 12 } },
+                    { text: "Just don't do this again.", effects: { milky: -2, mimi: -2 } },
+                    { text: "Hug each other.", effects: { milky: 8, mimi: 15 } }
+                ]
+            },
+            {
+                round: 5,
+                dialogues: [
+                    { speaker: 'Milky', text: "I guess I don't hate being around you." },
+                    { speaker: 'Mimi', text: "Really? You'll stay with me?" }
+                ],
+                choices: [
+                    { text: "Let's all cuddle together.", effects: { milky: 15, mimi: 15 } },
+                    { text: "Take turns spending time, okay?", effects: { milky: 10, mimi: 10 } },
+                    { text: "I'll leave you two alone.", effects: { milky: 5, mimi: -10 } }
+                ]
+            }
+        ];
+
+        /**
+         * Update mood values and clamp between 0-100
+         */
+        function updateMood(milkyChange, mimiChange) {
+            gameState.milkyMood = Math.max(0, Math.min(100, gameState.milkyMood + milkyChange));
+            gameState.mimiMood = Math.max(0, Math.min(100, gameState.mimiMood + mimiChange));
+            updateMoodBars();
+        }
+
+        /**
+         * Update the visual mood bars
+         */
+        function updateMoodBars() {
+            const milkyBar = document.getElementById('milkyMoodBar');
+            const mimiBar = document.getElementById('mimiMoodBar');
+            const milkyValue = document.getElementById('milkyMoodValue');
+            const mimiValue = document.getElementById('mimiMoodValue');
+
+            milkyBar.style.width = gameState.milkyMood + '%';
+            mimiBar.style.width = gameState.mimiMood + '%';
+            milkyValue.textContent = gameState.milkyMood;
+            mimiValue.textContent = gameState.mimiMood;
+        }
+
+        /**
+         * Display dialogue for current round
+         */
+        function displayDialogue(dialogues) {
+            const container = document.getElementById('dialogueContainer');
+            container.innerHTML = '';
+
+            dialogues.forEach((dialogue, index) => {
+                setTimeout(() => {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'dialogue-bubble';
+                    bubble.innerHTML = `
+                        <div class="dialogue-speaker">${dialogue.speaker}:</div>
+                        <div class="dialogue-text">${dialogue.text}</div>
+                    `;
+                    container.appendChild(bubble);
+                }, index * 800);
+            });
+        }
+
+        /**
+         * Display choices for current round
+         */
+        function displayChoices(choices) {
+            const container = document.getElementById('choicesContainer');
+            container.innerHTML = '';
+
+            choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.textContent = `${String.fromCharCode(65 + index)}) ${choice.text}`;
+                button.onclick = () => handleChoice(choice.effects);
+                container.appendChild(button);
+            });
+        }
+
+        /**
+         * Handle player choice and advance game
+         */
+        function handleChoice(effects) {
+            // Apply mood changes
+            updateMood(effects.milky, effects.mimi);
+
+            // Disable all buttons
+            const buttons = document.querySelectorAll('.choice-button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            // Move to next round or end game
+            setTimeout(() => {
+                gameState.round++;
+                if (gameState.round > gameState.totalRounds) {
+                    showEnding();
+                } else {
+                    startRound(gameState.round);
+                }
+            }, 1000);
+        }
+
+        /**
+         * Start a new round
+         */
+        function startRound(roundNumber) {
+            const roundData = gameScript[roundNumber - 1];
+            
+            // Update round indicator
+            document.getElementById('roundIndicator').textContent = `Round ${roundNumber} of ${gameState.totalRounds}`;
+
+            // Clear previous dialogue and choices
+            document.getElementById('dialogueContainer').innerHTML = '';
+            document.getElementById('choicesContainer').innerHTML = '';
+
+            // Display new dialogue
+            displayDialogue(roundData.dialogues);
+
+            // Display choices after dialogue
+            setTimeout(() => {
+                displayChoices(roundData.choices);
+            }, roundData.dialogues.length * 800 + 200);
+        }
+
+        /**
+         * Determine and show ending based on final moods
+         */
+        function showEnding() {
+            const gameScreen = document.getElementById('gameScreen');
+            const endingScreen = document.getElementById('endingScreen');
+            const endingTitle = document.getElementById('endingTitle');
+            const endingDescription = document.getElementById('endingDescription');
+            const finalMilkyMood = document.getElementById('finalMilkyMood');
+            const finalMimiMood = document.getElementById('finalMimiMood');
+
+            gameScreen.style.display = 'none';
+            endingScreen.classList.add('active');
+
+            finalMilkyMood.textContent = gameState.milkyMood;
+            finalMimiMood.textContent = gameState.mimiMood;
+
+            // Determine ending type
+            let endingType, endingText;
+
+            if (gameState.milkyMood > 75 && gameState.mimiMood > 75) {
+                endingType = 'Good Ending';
+                endingText = '🌟 Good Ending! 🌟<br><br>Both cats are happy and calm. You successfully helped them understand each other and find peace together.';
+            } else if (gameState.milkyMood < 50 || gameState.mimiMood < 50) {
+                endingType = 'Conflict Ending';
+                endingText = '⚠️ Conflict Ending ⚠️<br><br>The cats are still upset. They need more time and understanding to resolve their differences.';
+            } else {
+                endingType = 'Neutral Ending';
+                endingText = '✨ Neutral Ending ✨<br><br>The situation is stable, but there\'s still room for improvement in their relationship.';
+            }
+
+            endingTitle.textContent = endingType;
+            endingDescription.innerHTML = endingText;
+        }
+
+        /**
+         * Restart the game
+         */
+        function restartGame() {
+            gameState = {
+                round: 1,
+                milkyMood: 60,
+                mimiMood: 65,
+                totalRounds: 5
+            };
+
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('endingScreen').classList.remove('active');
+            
+            updateMoodBars();
+            startRound(1);
+        }
+
+        // Initialize game when page loads
+        window.onload = function() {
+            startRound(1);
+        };
+    </script>
+</body>
+</html>
